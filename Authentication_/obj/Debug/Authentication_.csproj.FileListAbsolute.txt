@@ -1,0 +1,9 @@
+C:\Users\ishukdn\OneDrive\projC#-work\Examen\Personal\Authentication_\bin\Debug\Authentication_.exe.config
+C:\Users\ishukdn\OneDrive\projC#-work\Examen\Personal\Authentication_\bin\Debug\Authentication_.exe
+C:\Users\ishukdn\OneDrive\projC#-work\Examen\Personal\Authentication_\bin\Debug\Authentication_.pdb
+C:\Users\ishukdn\OneDrive\projC#-work\Examen\Personal\Authentication_\obj\Debug\Authentication_.csproj.AssemblyReference.cache
+C:\Users\ishukdn\OneDrive\projC#-work\Examen\Personal\Authentication_\obj\Debug\Authentication_.csproj.SuggestedBindingRedirects.cache
+C:\Users\ishukdn\OneDrive\projC#-work\Examen\Personal\Authentication_\obj\Debug\Authentication_.csproj.CoreCompileInputs.cache
+C:\Users\ishukdn\OneDrive\projC#-work\Examen\Personal\Authentication_\obj\Debug\Authentication_.exe
+C:\Users\ishukdn\OneDrive\projC#-work\Examen\Personal\Authentication_\obj\Debug\Authentication_.pdb
+C:\Users\ishukdn\OneDrive\projC#-work\Examen\Personal\Authentication_\obj\Debug\Authentication_.g.resources
