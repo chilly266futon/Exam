@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,65 +31,92 @@ namespace Authentication_
             Console.WriteLine("Название предметной области варианта");
 
             // Пишем код здесь.
-            Console.WriteLine("Для демонстрации программы необходимо авторизоваться"); // слабакам можно обойтись без этого
-            Console.Write("Введите логин:");
+            // Console.WriteLine("Для демонстрации программы необходимо авторизоваться"); // слабакам можно обойтись без этого
+            // Console.Write("Введите логин:");
 
             bool infinity = true;
             string user_command;
 
-            User someUser = null;
+            User currentUser = null;
             List<User> users = new List<User>();
+            
+            Console.WriteLine("Меню: ");
+            Console.WriteLine("---");
+            
+            Console.WriteLine("signup - Регистрация. ");
+            Console.WriteLine("login - Вход. ");
+            Console.WriteLine("exit - Завершить программу. ");
             
 
             while (infinity)
             {
-                Console.WriteLine("Меню: ");
-                Console.WriteLine("1. Регистрация. ");
-                Console.WriteLine("2. Вход. ");
-                Console.WriteLine("3. Завершить программу. ");
+                Console.Write("Введите команду: ");
                 user_command = Console.ReadLine();
-                try
-                {
-                    byte userCom = Convert.ToByte(user_command);
-                    if (userCom > 1 && userCom < 3)
-                    {
-                        switch (userCom)
-                        {
-                            case 1:
-                            {
-                                // Console.Write("Введите логин: ");
-                                // string _login = Console.ReadLine();
-                                // Console.Write("Введите пароль");
-                                
-                                break;
-                            }
-                            case 2:
-                            {
-                                break;
-                            }
-
-                            case 3:
-                            {
-                                infinity = false;
-                                break;
-                            }
-                        }
-                    }
-                    
-
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    throw;
-                }
                 
+                switch (user_command)
+                {
+                    case "signup":
+                    {
+                        if (currentUser != null)
+                        {
+                            currentUser.Signout();
+                            break;
+                        }
+
+                        string login;
+                        string password;
+                        User.SignUp(out login, out password);
+
+                        currentUser = new User(login, password);
+                        users.Add(currentUser);
+                        break;
+                    }
+                    case "login":
+                    {
+                        // TODO
+                        
+                        
+                        
+                        break;
+                    }
+
+                    case "signout":
+                    {
+                        break;
+                    }
+
+                    case "exit":
+                    {
+                        infinity = false;
+                        break;
+                    }
+
+                    case "menu":
+                    {
+                        Console.WriteLine("Меню:");
+                        Console.WriteLine("---");
+
+                        Console.WriteLine("signup - Регистрация. ");
+                        Console.WriteLine("login - Вход. ");
+                        Console.WriteLine("exit - Завершить программу. ");
+                        Console.Write("Введите команду: ");
+                        break;
+                    }
+                    default:
+                    {
+                        Console.WriteLine("Ваша команда не определена, пожалуйста, повторите");
+                        Console.WriteLine("Для возвращения в меню введите команду menu");
+                        Console.WriteLine("Для завершения программы введите команду exit");
+                        break;
+                    }
+                }
+
 
 
             }
             
 
-            Console.ReadKey();
+            // Console.ReadKey();
         }
     }
 }
