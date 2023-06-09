@@ -70,13 +70,12 @@ namespace Authentication_
 
         public static void SignUp(out string _login, out string _password)
         {
-            bool _isExist = false;
             Console.Clear();
             Console.WriteLine("Регистрация");
             Console.Write("Введите логин: ");
             string curLogin = Console.ReadLine();
             string curPassword = null;
-            while (!_isExist)
+            while (true)
             {
                 if (IsNotmpty(curLogin))
                 {
@@ -85,7 +84,6 @@ namespace Authentication_
                         if (IsExist(curLogin))
                         {
                             Console.WriteLine("Введенный логин занят. ");
-                            _isExist = true;
                             break;
                         }
                         File.AppendAllText("C:\\Users\\kiril\\Downloads\\PersonalApp\\Personal\\Authentication_\\userpas.csv", curLogin + ",");
@@ -97,8 +95,6 @@ namespace Authentication_
                         }
                         break;
                     }
-
-                    _isExist = false;
                 }
 
                 
