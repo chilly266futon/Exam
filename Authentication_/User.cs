@@ -1,12 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
 using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Authentication_
 {
@@ -15,26 +8,19 @@ namespace Authentication_
         /* Описать поля Login, Password, StatusAuth, 
          * реализовать метод Auth для проверки логина и пароля */
         private string login;
-        private static string password;
-        private bool statusAuth = false;
-        
-        public User(string login, string password, bool statusAuth)
+        private string password;
+        private bool statusAuth;
+
+        public User(string login, string password)
         {
             this.login = login;
-            User.password = password;
-            this.statusAuth = statusAuth;
+            this.password = password;
         }
 
         public User()
         {
         }
 
-        public User(string login, string password)
-        {
-            this.login = login;
-            User.password = password;
-        }
-        
         public string Login
         {
             get => login;
@@ -57,82 +43,182 @@ namespace Authentication_
         /// <summary>
         /// Проверяет не пустая ли строка
         /// </summary>
-        /// <param name="field">проверяемая строка</param>
+        /// <param name="field">Проверяемая строка</param>
         /// <returns>true - если строка не пустая, false - если пустая</returns>
-        public static bool IsNotmpty(string field)
+        private static bool IsNotEmpty(string field)
         {
-            if (field == null)
-            {
-                return false;
-            }
-            return true;
+            return field != null;
         }
 
+        
+        /// <summary>
+        /// Регистрирует пользователя в системе
+        /// </summary>
+        /// <param name="_login"> Возвращает логин, заданный пользоватлем</param>
+        /// <param name="_password">Возвращает пароль, заданный пользователем</param>
         public static void SignUp(out string _login, out string _password)
         {
             Console.Clear();
-            Console.WriteLine("Регистрация");
-            Console.Write("Введите логин: ");
-            string curLogin = Console.ReadLine();
-            string curPassword = null;
+            Console.WriteLine("Регистрация"); 
+            Console.Write("Введите логин: "); 
+            var curLogin = Console.ReadLine();
             while (true)
             {
-                if (IsNotmpty(curLogin))
+                if (!IsNotEmpty(curLogin)) continue;
+                if (IsExist(curLogin))
                 {
-                    if (IsNotmpty(curLogin))
+                    Console.WriteLine("Введенный логин занят.");
+                    Console.Write("Введите логин: ");
+                    curLogin = Console.ReadLine();
+                    continue;
+                }
+                while (true)
+                {
+                    // TODO
+                    Console.Write("Введите пароль: ");
+                    var curPassword = Console.ReadLine();
+
+                    while (true)
                     {
-                        if (IsExist(curLogin))
+                        if (IsSuitablePasswordForSignup(curPassword))
                         {
-                            Console.WriteLine("Введенный логин занят. ");
+                            User curUser = new User(curLogin, curPassword); 
+                                                
+                            _login = curUser.Login;
+                            _password = curUser.Password;
+                            Console.WriteLine("Вы успешно зарегистрированы. Для входа введите команду login");
                             break;
                         }
-                        File.AppendAllText("C:\\Users\\kiril\\Downloads\\PersonalApp\\Personal\\Authentication_\\userpas.csv", curLogin + ",");
-                        Console.Write("Введите пароль: ");
-                        curPassword = Console.ReadLine();
-                        if (IsNotmpty(curPassword))
-                        {
-                            File.AppendAllText("C:\\Users\\kiril\\Downloads\\PersonalApp\\Personal\\Authentication_\\userpas.csv", curPassword);
-                        }
+                        Console.Write("Повторите ввод пароля: ");
+                        var confirmationPassword = Console.ReadLine();
+                        if (!IsNotEmpty(confirmationPassword)) continue;
+                        if (curPassword != confirmationPassword) 
+                        { 
+                            Console.WriteLine("Пароли не совпадают. "); 
+                            continue;
+                        } 
+                        File.AppendAllText(
+                            "C:\\Users\\kiril\\Downloads\\PersonalApp\\Personal\\Authentication_\\userpas.csv", 
+                            curLogin + "," + curPassword + "\n");
                         break;
                     }
+                    break;
                 }
-
-                
+                break;
             }
 
-            User curUser = new User(curLogin, curPassword);
-            _login = curUser.Login;
-            _password = curUser.Password;
-            Console.WriteLine("Вы успешно зарегистрированы. ");
+            // _login = curLogin;
+            // _password = curPassword;
         }
 
-        public static bool IsExist(string login)
+        /// <summary>
+        /// Проверяет существует ли пользователь с таким логином
+        /// </summary>
+        /// <param name="login">Логин</param>
+        /// <returns>true - если пользователь с таким логином существует, false - если не существует</returns>
+        private static bool IsExist(string login)
         {
-            using (StreamReader sr = new StreamReader("C:\\Users\\kiril\\Downloads\\PersonalApp\\Personal\\Authentication_\\userpas.csv"))
+            using StreamReader sr = new StreamReader(
+                "C:\\Users\\kiril\\Downloads\\PersonalApp\\Personal\\Authentication_\\userpas.csv");
+            while (sr.ReadLine() is { } line)
             {
-                string line;
-                while ((line = sr.ReadLine()) != null)
+                var str = line.Split(',');
+                for (var i = 0; i < str.Length; i += 2)
                 {
-                    string[] str = line.Split(',');
-                    for (int i = 0; i < str.Length; i += 2)
+                    if (str[i] == login)
                     {
-                        if (str[i] == login)
-                        {
-                            return true;
-                        }
+                        return true;
                     }
-                    
                 }
-                sr.Close();
             }
+            sr.Close();
             return false;
         }
+        
+        
+        /// <summary>
+        /// Аутентификация пользователя
+        /// </summary>
+        public void Auth()
+        {
+            Console.Clear();
+            Console.WriteLine("Вход");
+            Console.Write("Введите логин: ");
+            var _login = Console.ReadLine();
+            while (true)
+            {
+                if (!IsSuitableLoginForAuth(_login))
+                {
+                    Console.WriteLine("Пользователь с таким логином не найден.");
+                    Console.Write("Введите логин: ");
+                    _login = Console.ReadLine();
+                    continue;
+                }
 
-        public void Signout()
+                while (true)
+                {
+                    Console.Write("Введите пароль: ");
+                    var _password = Console.ReadLine();
+                    if (!IsSuitablePasswordForAuth(_login, _password))
+                    {
+                        Console.WriteLine("Неверный пароль. Попробуйте снова...");
+                        continue;
+                    }
+                    Console.WriteLine("Авторизация прошла успешно.");
+                    statusAuth = true;
+                    break;
+                }
+                break;
+            }
+        }
+
+        public void AddExistingUsers()
         {
             // TODO
         }
-        
+
+
+        private static bool IsSuitableLoginForAuth(string _login)
+        {
+            return IsNotEmpty(_login) && IsExist(_login);
+        }
+
+        private static bool IsSuitablePasswordForSignup(string _password)
+        {
+            if (!IsNotEmpty(_password)) return false;
+            switch (_password.Length)
+            {
+                case < 8:
+                    Console.WriteLine("Пароль слишком короткий. Длина пароля должна быть не менее 8 символов.");
+                    return false;
+                case <= 20:
+                    return true;
+                default:
+                    Console.WriteLine("Пароль слишком длинный. Длина пароля должна быть не более 20 символов.");
+                    return false;
+            }
+        }
+
+        private static bool IsSuitablePasswordForAuth(string _login, string _password)
+        {
+            using StreamReader sr = new StreamReader(
+                "C:\\Users\\kiril\\Downloads\\PersonalApp\\Personal\\Authentication_\\userpas.csv");
+            string line;
+            while ((line = sr.ReadLine()) != null)
+            {
+                var str = line.Split(',');
+                for (var i = 0; i < str.Length; i += 2)
+                {
+                    if (str[i] != _login) continue;
+                    if (str[i + 1] == _password)
+                    {
+                        return true;
+                    }
+                }
+            }
+            sr.Close();
+            return false;
+        }
 
     }
 }

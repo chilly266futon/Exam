@@ -26,7 +26,7 @@ namespace Authentication_
             Создавать экземпляры класса может только пользователь со статусом StatusAuth = True
             */
 
-            Console.WriteLine("Автор программы: Рогачев Кирилл");
+            Console.WriteLine("Автор программы: Кирилл Рогачев");
             Console.WriteLine("Вариант: __");
             Console.WriteLine("Название предметной области варианта");
 
@@ -37,7 +37,7 @@ namespace Authentication_
             bool infinity = true;
             string user_command;
 
-            User currentUser = null;
+            User currentUser = new User();
             List<User> users = new List<User>();
             
             Console.WriteLine("Меню: ");
@@ -45,6 +45,7 @@ namespace Authentication_
             
             Console.WriteLine("signup - Регистрация. ");
             Console.WriteLine("login - Вход. ");
+            Console.WriteLine("signout - Деаутентификация. ");
             Console.WriteLine("exit - Завершить программу. ");
             
 
@@ -57,11 +58,7 @@ namespace Authentication_
                 {
                     case "signup":
                     {
-                        if (currentUser != null)
-                        {
-                            currentUser.Signout();
-                            break;
-                        }
+                        currentUser.StatusAuth = false;
 
                         string login;
                         string password;
@@ -73,15 +70,15 @@ namespace Authentication_
                     }
                     case "login":
                     {
-                        // TODO
-                        
-                        
-                        
+                        currentUser.StatusAuth = false;
+                        currentUser.Auth();
                         break;
                     }
 
                     case "signout":
                     {
+                        currentUser.StatusAuth = false;
+                        Console.WriteLine("Деаутентификация прошла успешно.");
                         break;
                     }
 
