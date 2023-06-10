@@ -32,8 +32,11 @@ namespace Authentication_
             bool infinity = true;
             string user_command;
 
+            ushort secretKey = 0x0088; // Секретный ключ
+
             User currentUser = new User();
             List<User> users = new List<User>();
+            
             using StreamReader sr = new StreamReader(
                 "C:\\Users\\kiril\\Downloads\\PersonalApp\\Personal\\Authentication_\\userpas.csv");
             while (sr.ReadLine() is { } line)
@@ -41,7 +44,9 @@ namespace Authentication_
                 var str = line.Split(',');
                 for (var i = 0; i < str.Length; i += 2)
                 {
-                    users.Add(new User(str[i], str[i + 1]));
+                    var decryptedLogin = User.EncodeDecrypt(str[i], secretKey);
+                    var decryptedPassword = User.EncodeDecrypt(str[i++], secretKey);
+                    users.Add(new User(decryptedLogin, decryptedPassword));
                 }
             }
             sr.Close();
@@ -69,7 +74,7 @@ namespace Authentication_
 
                         string login;
                         string password;
-                        User.SignUp(out login, out password);
+                        User.SignUp(secretKey, out login, out password);
 
                         currentUser = new User(login, password);
                         users.Add(currentUser);
@@ -78,7 +83,7 @@ namespace Authentication_
                     case "login":
                     {
                         currentUser.StatusAuth = false;
-                        currentUser.Auth();
+                        currentUser.Auth(secretKey);
                         break;
                     }
 

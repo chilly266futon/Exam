@@ -1,5 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Authentication_
 {
@@ -54,9 +57,10 @@ namespace Authentication_
         /// <summary>
         /// Регистрирует пользователя в системе
         /// </summary>
+        /// <param name="secretKey"></param>
         /// <param name="_login"> Возвращает логин, заданный пользоватлем</param>
         /// <param name="_password">Возвращает пароль, заданный пользователем</param>
-        public static void SignUp(out string _login, out string _password)
+        public static void SignUp(ushort secretKey, out string _login, out string _password)
         {
             Console.Clear();
             Console.WriteLine("Регистрация");
@@ -66,11 +70,14 @@ namespace Authentication_
             bool isSignedUp = false;
             bool isSuitable = false;
             
+            string encryptedLogin = "";
+            string encryptedPassword = "";
+
             while (!isSignedUp)
             {
                 if (IsNotEmpty(curLogin))
                 {
-                    if (!IsExist(curLogin))
+                    if (!IsExist(curLogin, secretKey))
                     {
                         while (!isSuitable)
                         {
@@ -91,9 +98,12 @@ namespace Authentication_
                                     break;
                                 }
 
+                                encryptedLogin = EncodeDecrypt(curLogin, secretKey);
+                                encryptedPassword = EncodeDecrypt(curPassword, secretKey);
+                                
                                 File.AppendAllText(
                                     "C:\\Users\\kiril\\Downloads\\PersonalApp\\Personal\\Authentication_\\userpas.csv",
-                                    curLogin + "," + curPassword + "\n");
+                                    encryptedLogin + "," + encryptedPassword + "\n");
                                 User curUser = new User(curLogin, curPassword);
 
                                 _login = curUser.Login;
@@ -116,13 +126,14 @@ namespace Authentication_
             _password = curPassword;
         }
 
-        
+
         /// <summary>
         /// Проверяет существует ли пользователь с таким логином
         /// </summary>
         /// <param name="login">Логин</param>
+        /// <param name="secretKey"></param>
         /// <returns>true - если пользователь с таким логином существует, false - если не существует</returns>
-        private static bool IsExist(string login)
+        private static bool IsExist(string login, ushort secretKey)
         {
             using StreamReader sr = new StreamReader(
                 "C:\\Users\\kiril\\Downloads\\PersonalApp\\Personal\\Authentication_\\userpas.csv");
@@ -131,7 +142,8 @@ namespace Authentication_
                 var str = line.Split(',');
                 for (var i = 0; i < str.Length; i += 2)
                 {
-                    if (str[i] == login)
+                    var decryptedLogin = EncodeDecrypt(str[i], secretKey);
+                    if (decryptedLogin == login)
                     {
                         return true;
                     }
@@ -140,12 +152,13 @@ namespace Authentication_
             sr.Close();
             return false;
         }
-        
-        
+
+
         /// <summary>
         /// Аутентификация пользователя
         /// </summary>
-        public void Auth()
+        /// <param name="secretKey"></param>
+        public void Auth(ushort secretKey)
         {
             Console.Clear();
             Console.WriteLine("Вход");
@@ -153,7 +166,7 @@ namespace Authentication_
             var _login = Console.ReadLine();
             while (true)
             {
-                if (!IsSuitableLoginForAuth(_login))
+                if (!IsSuitableLoginForAuth(_login, secretKey))
                 {
                     Console.WriteLine("Пользователь с таким логином не найден.");
                     Console.Write("Введите логин: ");
@@ -165,7 +178,7 @@ namespace Authentication_
                 {
                     Console.Write("Введите пароль: ");
                     var _password = Console.ReadLine();
-                    if (!IsSuitablePasswordForAuth(_login, _password))
+                    if (!IsSuitablePasswordForAuth(_login, _password, secretKey))
                     {
                         Console.WriteLine("Неверный пароль. Попробуйте снова...");
                         continue;
@@ -179,9 +192,9 @@ namespace Authentication_
         }
 
 
-        private static bool IsSuitableLoginForAuth(string _login)
+        private static bool IsSuitableLoginForAuth(string _login, ushort secretKey)
         {
-            return IsNotEmpty(_login) && IsExist(_login);
+            return IsNotEmpty(_login) && IsExist(_login, secretKey);
         }
 
         
@@ -201,7 +214,7 @@ namespace Authentication_
             }
         }
 
-        private static bool IsSuitablePasswordForAuth(string _login, string _password)
+        private static bool IsSuitablePasswordForAuth(string _login, string _password, ushort secretKey)
         {
             using StreamReader sr = new StreamReader(
                 "C:\\Users\\kiril\\Downloads\\PersonalApp\\Personal\\Authentication_\\userpas.csv");
@@ -211,8 +224,10 @@ namespace Authentication_
                 var str = line.Split(',');
                 for (var i = 0; i < str.Length; i += 2)
                 {
-                    if (str[i] != _login) continue;
-                    if (str[i + 1] == _password)
+                    var decryptedLogin = EncodeDecrypt(str[i], secretKey);
+                    var secryptedPassword = EncodeDecrypt(str[i + 1], secretKey);
+                    if (decryptedLogin != _login) continue;
+                    if (secryptedPassword == _password)
                     {
                         return true;
                     }
@@ -220,6 +235,26 @@ namespace Authentication_
             }
             sr.Close();
             return false;
+        }
+
+
+        public static string EncodeDecrypt(string str, ushort secretKey)
+        {
+            var ch = str.ToArray();
+            string newStr = "";
+            foreach (var c in ch)
+            {
+                newStr += TopSecret(c, secretKey);
+            }
+
+            return newStr;
+        }
+
+
+        public static char TopSecret(char character, ushort secretKey)
+        {
+            character = (char)(character ^ secretKey);
+            return character;
         }
 
     }
