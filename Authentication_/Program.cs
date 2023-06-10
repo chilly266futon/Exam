@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Authentication_
 {
@@ -39,6 +34,18 @@ namespace Authentication_
 
             User currentUser = new User();
             List<User> users = new List<User>();
+            using StreamReader sr = new StreamReader(
+                "C:\\Users\\kiril\\Downloads\\PersonalApp\\Personal\\Authentication_\\userpas.csv");
+            while (sr.ReadLine() is { } line)
+            {
+                var str = line.Split(',');
+                for (var i = 0; i < str.Length; i += 2)
+                {
+                    users.Add(new User(str[i], str[i + 1]));
+                }
+            }
+            sr.Close();
+            
             
             Console.WriteLine("Меню: ");
             Console.WriteLine("---");
@@ -95,6 +102,7 @@ namespace Authentication_
 
                         Console.WriteLine("signup - Регистрация. ");
                         Console.WriteLine("login - Вход. ");
+                        Console.WriteLine("signout - Деаутентификация. ");
                         Console.WriteLine("exit - Завершить программу. ");
                         Console.Write("Введите команду: ");
                         break;

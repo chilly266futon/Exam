@@ -50,7 +50,7 @@ namespace Authentication_
             return field != null;
         }
 
-        
+
         /// <summary>
         /// Регистрирует пользователя в системе
         /// </summary>
@@ -59,58 +59,64 @@ namespace Authentication_
         public static void SignUp(out string _login, out string _password)
         {
             Console.Clear();
-            Console.WriteLine("Регистрация"); 
-            Console.Write("Введите логин: "); 
+            Console.WriteLine("Регистрация");
+            Console.Write("Введите логин: ");
             var curLogin = Console.ReadLine();
-            while (true)
+            string curPassword = null;
+            bool isSignedUp = false;
+            bool isSuitable = false;
+            
+            while (!isSignedUp)
             {
-                if (!IsNotEmpty(curLogin)) continue;
-                if (IsExist(curLogin))
+                if (IsNotEmpty(curLogin))
                 {
-                    Console.WriteLine("Введенный логин занят.");
-                    Console.Write("Введите логин: ");
-                    curLogin = Console.ReadLine();
-                    continue;
-                }
-                while (true)
-                {
-                    // TODO
-                    Console.Write("Введите пароль: ");
-                    var curPassword = Console.ReadLine();
-
-                    while (true)
+                    if (!IsExist(curLogin))
                     {
-                        if (IsSuitablePasswordForSignup(curPassword))
+                        while (!isSuitable)
                         {
-                            User curUser = new User(curLogin, curPassword); 
-                                                
-                            _login = curUser.Login;
-                            _password = curUser.Password;
-                            Console.WriteLine("Вы успешно зарегистрированы. Для входа введите команду login");
-                            break;
-                        }
-                        Console.Write("Повторите ввод пароля: ");
-                        var confirmationPassword = Console.ReadLine();
-                        if (!IsNotEmpty(confirmationPassword)) continue;
-                        if (curPassword != confirmationPassword) 
-                        { 
-                            Console.WriteLine("Пароли не совпадают. "); 
-                            continue;
-                        } 
-                        File.AppendAllText(
-                            "C:\\Users\\kiril\\Downloads\\PersonalApp\\Personal\\Authentication_\\userpas.csv", 
-                            curLogin + "," + curPassword + "\n");
-                        break;
-                    }
-                    break;
-                }
-                break;
-            }
+                            Console.Write("Введите пароль: ");
+                            curPassword = Console.ReadLine();
+                            while (!isSignedUp)
+                            {
+                                if (!IsSuitablePasswordForSignup(curPassword))
+                                {
+                                    break; 
+                                }
+                                Console.Write("Повторите ввод пароля: ");
+                                var confirmationPassword = Console.ReadLine();
+                                if (!IsNotEmpty(confirmationPassword)) continue;
+                                if (curPassword != confirmationPassword)
+                                {
+                                    Console.WriteLine("Пароли не совпадают. ");
+                                    break;
+                                }
 
-            // _login = curLogin;
-            // _password = curPassword;
+                                File.AppendAllText(
+                                    "C:\\Users\\kiril\\Downloads\\PersonalApp\\Personal\\Authentication_\\userpas.csv",
+                                    curLogin + "," + curPassword + "\n");
+                                User curUser = new User(curLogin, curPassword);
+
+                                _login = curUser.Login;
+                                _password = curUser.Password;
+                                Console.WriteLine("Вы успешно зарегистрированы. Для входа введите команду login");
+                                isSignedUp = true;
+                                isSuitable = true;
+                                break;
+                            }
+                        }
+                        continue;
+                    }
+                }
+                
+                Console.WriteLine("Введенный логин занят.");
+                Console.Write("Введите логин: ");
+                curLogin = Console.ReadLine();
+            }
+            _login = curLogin;
+            _password = curPassword;
         }
 
+        
         /// <summary>
         /// Проверяет существует ли пользователь с таким логином
         /// </summary>
@@ -172,17 +178,13 @@ namespace Authentication_
             }
         }
 
-        public void AddExistingUsers()
-        {
-            // TODO
-        }
-
 
         private static bool IsSuitableLoginForAuth(string _login)
         {
             return IsNotEmpty(_login) && IsExist(_login);
         }
 
+        
         private static bool IsSuitablePasswordForSignup(string _password)
         {
             if (!IsNotEmpty(_password)) return false;
